@@ -53,7 +53,6 @@ public class GameConnection : MonoBehaviourPunCallbacks
     {
         base.OnPlayerLeftRoom(otherPlayer);
         Debug.Log("Player saiu na sala: " + otherPlayer.NickName);
-
     }
 
     public override void OnJoinedRoom()

@@ -1,7 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPunCallbacks
 {
 
     private float spd = 7f; //velocidade de movimento
@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     float anguloanimationtime = 60;
     private Animator animator; //objeto animator
     private Rigidbody rb; //objeto rigidbody
+    public GameObject self;
     public GameObject hand;
 
 
@@ -43,6 +44,7 @@ public class PlayerController : MonoBehaviour
         ps.Stop();
         animator = GetComponentInChildren<Animator>(); //pegar o objeto animator do filho
         rb = GetComponent<Rigidbody>(); //pegar o objeto rigidbody
+        self = this.gameObject;
         angulotempo = 0;
 
         transform.localScale = new Vector3(2.5f, 2.5f, 2.5f);
@@ -69,7 +71,6 @@ public class PlayerController : MonoBehaviour
 
             //segurar objetos
             if (timesegurar >0) timesegurar--;
-            Debug.Log(timesegurar);
             if (use > 0)
             {
                 if(itemperto==1)
@@ -79,11 +80,12 @@ public class PlayerController : MonoBehaviour
                         if (!segurando)
                         {
                             //segurar
-                            itemspec.gameObject.transform.position = hand.transform.position;
                             //itemspec.isTrigger = true;
-                            var kinechan = itemspec.gameObject.GetComponent<Rigidbody>();
-                            kinechan.isKinematic = true;
-                            itemspec.gameObject.transform.parent = hand.transform;
+                            //var pv = itemspec.gameObject.GetComponent<PhotonView>();
+                            itemspec.gameObject.GetComponent<OwnerItem>().ResquestOwner();
+                            itemspec.gameObject.GetComponent<OwnerItem>().parentid = myPhotonView.ViewID;
+                            //itemspec.gameObject.transform.parent = hand.transform; 
+                            //itemspec.gameObject.transform.SetParent(PhotonView.Find());
                             segurando = true;
                             timesegurar = 160;
 
@@ -95,12 +97,10 @@ public class PlayerController : MonoBehaviour
                     if (timesegurar <= 0)
                     {
                          segurando = false;
-
-                         itemspec.gameObject.transform.parent = null;
-                         var kinechan = itemspec.gameObject.GetComponent<Rigidbody>();
-                         kinechan.isKinematic = false;
+                         itemspec.gameObject.GetComponent<OwnerItem>().parentid = -1;
+                         //itemspec.gameObject.transform.parent = null;
                          timesegurar = 160;
-                        //soltar
+                         //soltar
                     }
                 }
             }
