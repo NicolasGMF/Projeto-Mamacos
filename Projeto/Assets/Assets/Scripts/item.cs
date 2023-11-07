@@ -34,6 +34,6 @@ public class item : MonoBehaviourPunCallbacks
             GameObject objeto = PhotonNetwork.Instantiate(itemname, pos, rot);
 
         }
-        gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 }

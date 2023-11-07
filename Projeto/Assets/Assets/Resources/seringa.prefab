@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d3d2263115605e4ba053ebf6d74d8aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parentid: -1
+  parentid: -2
 --- !u!54 &1799715547741264592
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -152,7 +152,7 @@ MonoBehaviour:
   Group: 0
   prefixField: -1
   Synchronization: 3
-  OwnershipTransfer: 1
+  OwnershipTransfer: 2
   observableSearch: 2
   ObservedComponents:
   - {fileID: -6107342791828890111}

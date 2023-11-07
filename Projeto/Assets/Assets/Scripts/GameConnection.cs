@@ -7,6 +7,7 @@ public class GameConnection : MonoBehaviourPunCallbacks
     public string roomName = "PUCC";
     public string playerNickname = "";
 
+
     public PlayerController mySelf;
     public Animator animator;
 
@@ -59,11 +60,11 @@ public class GameConnection : MonoBehaviourPunCallbacks
     {
         //aqui VOCE entrou numa sala
         Debug.Log("Entrei na sala: " + PhotonNetwork.CurrentRoom.Name);
-        base.OnJoinedRoom();
+        //base.OnJoinedRoom();
         Vector3 position = new Vector3(0, 4, 0);
         Quaternion rotation = Quaternion.Euler(Vector3.up * Random.Range(0, 360.0f));
-        GameObject myPlayer = PhotonNetwork.Instantiate("Player", position, rotation);
-        mySelf = myPlayer.GetComponent<PlayerController>();
+        GlobalVariables.Instance.myPlayer = PhotonNetwork.Instantiate("Player", position, rotation);
+        mySelf = GlobalVariables.Instance.myPlayer.GetComponent<PlayerController>();
         animator = mySelf.GetComponentInChildren<Animator>();
     }
 }

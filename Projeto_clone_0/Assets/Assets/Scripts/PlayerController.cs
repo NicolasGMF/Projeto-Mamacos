@@ -1,9 +1,12 @@
 using UnityEngine;
 using Photon.Pun;
+using Photon.Realtime;
+using ExitGames.Client.Photon.StructWrapping;
 
 public class PlayerController : MonoBehaviourPunCallbacks
 {
 
+    public int myId;
     private float spd = 7f; //velocidade de movimento
     private float spdangular = 7;
     private float hsp;
@@ -14,6 +17,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private int timesegurar = 0;
     private int idletime = 0;
     private int itemperto = 0;
+    private int playerid;
     private Collider itemspec;
     float angulotempo = 0;
     float angulonovo;
@@ -41,12 +45,12 @@ public class PlayerController : MonoBehaviourPunCallbacks
     //--------------------------------------------------------
     void Start()
     {
+
         ps.Stop();
         animator = GetComponentInChildren<Animator>(); //pegar o objeto animator do filho
         rb = GetComponent<Rigidbody>(); //pegar o objeto rigidbody
         self = this.gameObject;
         angulotempo = 0;
-
         transform.localScale = new Vector3(2.5f, 2.5f, 2.5f);
 
         
@@ -54,6 +58,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
         {
             Destroy(gameObject);
         }
+
+        myId = myPhotonView.ViewID;
     }
 
     //--------------------------------------------------------
@@ -82,8 +88,11 @@ public class PlayerController : MonoBehaviourPunCallbacks
                             //segurar
                             //itemspec.isTrigger = true;
                             //var pv = itemspec.gameObject.GetComponent<PhotonView>();
+                            //itemspec.gameObject.GetComponent<OwnerItem>().ResquestOwner(PhotonNetwork.LocalPlayer.Get(PhotonNetwork.LocalPlayer.ActorNumber));
+                            Debug.Log("Pegou");
                             itemspec.gameObject.GetComponent<OwnerItem>().ResquestOwner();
-                            itemspec.gameObject.GetComponent<OwnerItem>().parentid = myPhotonView.ViewID;
+                            itemspec.gameObject.GetComponent<OwnerItem>().parentid = myId;
+                            itemspec.gameObject.GetComponent<OwnerItem>().pegou = true;
                             //itemspec.gameObject.transform.parent = hand.transform; 
                             //itemspec.gameObject.transform.SetParent(PhotonView.Find());
                             segurando = true;
@@ -97,7 +106,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
                     if (timesegurar <= 0)
                     {
                          segurando = false;
-                         itemspec.gameObject.GetComponent<OwnerItem>().parentid = -1;
+                         itemspec.gameObject.GetComponent<OwnerItem>().soltou = true;
                          //itemspec.gameObject.transform.parent = null;
                          timesegurar = 160;
                          //soltar
