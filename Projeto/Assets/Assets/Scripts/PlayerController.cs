@@ -224,10 +224,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
                             itemspec = other;
                             var nameScript = other.gameObject.GetComponent<Outline>();
 
-                            nameScript.ChangeWidth(2f);
+                            nameScript.ChangeWidth(4f);
                             if (playernumber == 1)
                             {
-                                nameScript.OutlineColor = Color.red;
+                                nameScript.OutlineColor = Color.yellow;
                             }
                             if (playernumber == 2)
                             {
