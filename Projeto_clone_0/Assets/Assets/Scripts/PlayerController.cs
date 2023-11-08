@@ -2,6 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon.StructWrapping;
+using UnityEditor;
 
 public class PlayerController : MonoBehaviourPunCallbacks
 {
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private Animator animator; //objeto animator
     private Rigidbody rb; //objeto rigidbody
     public GameObject self;
+    public int playernumber;
     public GameObject hand;
 
 
@@ -45,11 +47,12 @@ public class PlayerController : MonoBehaviourPunCallbacks
     //--------------------------------------------------------
     void Start()
     {
-
+        playernumber = PhotonNetwork.LocalPlayer.ActorNumber;
+        self = this.gameObject;
+        
         ps.Stop();
         animator = GetComponentInChildren<Animator>(); //pegar o objeto animator do filho
         rb = GetComponent<Rigidbody>(); //pegar o objeto rigidbody
-        self = this.gameObject;
         angulotempo = 0;
         transform.localScale = new Vector3(2.5f, 2.5f, 2.5f);
 
@@ -76,10 +79,22 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
 
             //segurar objetos
+
             if (timesegurar >0) timesegurar--;
             if (use > 0)
             {
-                if(itemperto==1)
+                if (segurando)
+                {
+                    if (timesegurar <= 0)
+                    {
+                        segurando = false;
+                        itemspec.gameObject.GetComponent<OwnerItem>().soltou = true;
+                        //itemspec.gameObject.transform.parent = null;
+                        timesegurar = 160;
+                        //soltar
+                    }
+                }
+                if (itemperto==1)
                 {
                     if(timesegurar<=0)
                     {
@@ -89,8 +104,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
                             //itemspec.isTrigger = true;
                             //var pv = itemspec.gameObject.GetComponent<PhotonView>();
                             //itemspec.gameObject.GetComponent<OwnerItem>().ResquestOwner(PhotonNetwork.LocalPlayer.Get(PhotonNetwork.LocalPlayer.ActorNumber));
-                            Debug.Log("Pegou");
-                            itemspec.gameObject.GetComponent<OwnerItem>().ResquestOwner();
+                            itemspec.gameObject.GetComponent<OwnerItem>().PV.RequestOwnership();
+                            itemspec.gameObject.GetComponent<OwnerItem>().newow = true;
                             itemspec.gameObject.GetComponent<OwnerItem>().parentid = myId;
                             itemspec.gameObject.GetComponent<OwnerItem>().pegou = true;
                             //itemspec.gameObject.transform.parent = hand.transform; 
@@ -99,17 +114,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
                             timesegurar = 160;
 
                         }
-                    }
-                }
-                if(segurando)
-                {
-                    if (timesegurar <= 0)
-                    {
-                         segurando = false;
-                         itemspec.gameObject.GetComponent<OwnerItem>().soltou = true;
-                         //itemspec.gameObject.transform.parent = null;
-                         timesegurar = 160;
-                         //soltar
                     }
                 }
             }
@@ -204,14 +208,37 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         if(itemperto==0)
         {
-            if (other.gameObject.CompareTag("Item"))
+            if(segurando)
             {
-                itemperto = 1;
-                itemspec = other;
-                var nameScript = other.gameObject.GetComponent<Outline>();
-                nameScript.ChangeWidth(2f);
 
-                // if (other.contacts[0].otherCollider.transform.gameObject.name == "HeadShot")
+            }
+            else
+            {
+                if (other.gameObject.CompareTag("Item"))
+                {
+                    if(myPhotonView.IsMine)
+                    {
+                        if (!other.gameObject.GetComponent<OwnerItem>().segurando2)
+                        {
+                            itemperto = 1;
+                            itemspec = other;
+                            var nameScript = other.gameObject.GetComponent<Outline>();
+
+                            nameScript.ChangeWidth(2f);
+                            if (playernumber == 1)
+                            {
+                                nameScript.OutlineColor = Color.red;
+                            }
+                            if (playernumber == 2)
+                            {
+                                nameScript.OutlineColor = Color.blue;
+                            }
+
+                            // if (other.contacts[0].otherCollider.transform.gameObject.name == "HeadShot")
+                        }
+                    }
+                    
+                }
             }
         }
     }

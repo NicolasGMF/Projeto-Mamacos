@@ -1,12 +1,12 @@
 using UnityEngine;
 using Photon.Realtime;
 using Photon.Pun;
+using UnityEditor;
 
 public class GameConnection : MonoBehaviourPunCallbacks
 {
     public string roomName = "PUCC";
     public string playerNickname = "";
-
 
     public PlayerController mySelf;
     public Animator animator;
@@ -58,12 +58,25 @@ public class GameConnection : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+
+        var playernumber = PhotonNetwork.LocalPlayer.ActorNumber;
+        Debug.Log("Eu sou o jogador: " + playernumber);
+        
+
+
         //aqui VOCE entrou numa sala
         Debug.Log("Entrei na sala: " + PhotonNetwork.CurrentRoom.Name);
         //base.OnJoinedRoom();
         Vector3 position = new Vector3(0, 4, 0);
         Quaternion rotation = Quaternion.Euler(Vector3.up * Random.Range(0, 360.0f));
-        GlobalVariables.Instance.myPlayer = PhotonNetwork.Instantiate("Player", position, rotation);
+        if(playernumber==1)
+        {
+            GlobalVariables.Instance.myPlayer = PhotonNetwork.Instantiate("Player", position, rotation);
+        }
+        if(playernumber==2)
+        {
+            GlobalVariables.Instance.myPlayer = PhotonNetwork.Instantiate("Player2", position, rotation);
+        }
         mySelf = GlobalVariables.Instance.myPlayer.GetComponent<PlayerController>();
         animator = mySelf.GetComponentInChildren<Animator>();
     }

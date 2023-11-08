@@ -8,23 +8,24 @@ using UnityEngine.UIElements;
 public class OwnerItem : MonoBehaviourPunCallbacks
 {
 
-    public int parentid = -2;
+    public int parentid = -1;
     public bool soltou = false;
-    public bool segurando = false;
+    public bool newow = false;
+    public bool segurando2 = false;
     public bool pegou = false;
     private int playerid;
     private Rigidbody rb;
     private Collider coll;
     private PhotonView parent;
     private GameObject parenthand;
-    private PhotonView PV;
+    public PhotonView PV;
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         coll = GetComponent<Collider>();
         PV = GetComponent<PhotonView>();
-        parentid = -2;
+        parentid = -1;
     }
 
     [PunRPC]
@@ -44,51 +45,64 @@ public class OwnerItem : MonoBehaviourPunCallbacks
     // Update is called once per frame
     private void FixedUpdate()
     {
-        //>= 0 alguem pegou
-        if (pegou)
+        if(!newow)
         {
-            rb.isKinematic = true;
-            coll.isTrigger = true;
-            parent = PhotonView.Find(parentid);
-            parenthand = parent.GetComponent<PlayerController>().hand;
-            transform.position = parenthand.transform.position;
-            this.transform.SetParent(parenthand.transform);
-            playerid = GlobalVariables.Instance.myPlayer.GetComponent<PlayerController>().myId;
-            Debug.Log("Pegou - IdPai: " + parentid + " IdPlayer: " + playerid);
-            if (parentid==playerid)
+            //>= 0 alguem pegou
+            if (pegou)
             {
-                PV.RPC("ChangeParentId", RpcTarget.OthersBuffered, parentid);
-            }
-            //Debug.Log(parent.gameObject);
-            //this.transform.SetParent(parent.gameObject.transform);
-            pegou = false;
-            segurando = true;
-        }
-        //-1 soltou
-        if(soltou)
-        {
-            if (parentid != -1)
-            {
+                rb.isKinematic = true;
+                coll.isTrigger = true;
+                parent = PhotonView.Find(parentid);
+                parenthand = parent.GetComponent<PlayerController>().hand;
+                transform.position = parenthand.transform.position;
+                this.transform.SetParent(parenthand.transform);
+                this.transform.rotation = new Quaternion(0, 0, 0, 0);
                 playerid = GlobalVariables.Instance.myPlayer.GetComponent<PlayerController>().myId;
-                Debug.Log("Soltou - IdPai: " + parentid + " IdPlayer: " + playerid);
+                //Debug.Log("Pegou - IdPai: " + parentid + " IdPlayer: " + playerid);
                 if (parentid == playerid)
                 {
-                    PV.RPC("RestartParentId", RpcTarget.OthersBuffered, parentid);
+                    //Debug.Log("Eu sou eu, mas eu sou dono do photoview?: " + PV.IsMine);
+                    if (PV.IsMine) PV.RPC("ChangeParentId", RpcTarget.OthersBuffered, parentid);
                 }
-                rb.isKinematic = false;
-                coll.isTrigger = false;
-                this.transform.SetParent(null);
-                soltou = false;
-                segurando = false;
+                //Debug.Log(parent.gameObject);
+                //this.transform.SetParent(parent.gameObject.transform);
+                pegou = false;
+                segurando2 = true;
             }
-            else Debug.Log("Erro: Codigo do pai chegando -1");
-            
+            //-1 soltou
+            if (soltou)
+            {
+                if (parentid != -1)
+                {
+                    if (segurando2)
+                    {
+                        playerid = GlobalVariables.Instance.myPlayer.GetComponent<PlayerController>().myId;
+                        //Debug.Log("Soltou - IdPai: " + parentid + " IdPlayer: " + playerid);
+                        if (parentid == playerid)
+                        {
+                            if (PV.IsMine) PV.RPC("RestartParentId", RpcTarget.OthersBuffered, parentid);
+                        }
+                        rb.isKinematic = false;
+                        coll.isTrigger = false;
+                        this.transform.SetParent(null);
+                        soltou = false;
+                        segurando2 = false;
+                    }
+                    else
+                    {
+                        Debug.Log("Erro: Segurando2 deu false");
+
+                    }
+                }
+                else Debug.Log("Erro: Codigo do pai chegando -1");
+
+            }
+        }
+        else
+        {
+            if (PV.IsMine) newow = false;
         }
        
     }
 
-    public void ResquestOwner()
-    {
-        base.photonView.RequestOwnership();
-    }
 }
