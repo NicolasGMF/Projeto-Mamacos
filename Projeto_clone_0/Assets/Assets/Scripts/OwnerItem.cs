@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 public class OwnerItem : MonoBehaviourPunCallbacks
 {
-
+    public int itemid;
     public int parentid = -1;
     public bool soltou = false;
     public bool newow = false;

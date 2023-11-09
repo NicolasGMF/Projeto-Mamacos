@@ -146,6 +146,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myId: 0
+  entregou: 0
+  macacerta: {fileID: 0}
+  segurando: 0
+  segurandocerto: 0
+  itemspec: {fileID: 0}
   self: {fileID: 0}
   playernumber: 0
   hand: {fileID: 4966718893995646182}

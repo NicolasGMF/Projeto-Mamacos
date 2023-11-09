@@ -7,19 +7,24 @@ using UnityEditor;
 public class PlayerController : MonoBehaviourPunCallbacks
 {
 
+    public Player player;
     public int myId;
     private float spd = 7f; //velocidade de movimento
     private float spdangular = 7;
     private float hsp;
+    private float timeusando = 0;
+    public bool entregou = false;
+    public GameObject macacerta;
     private float use;
     private float vsp;
     private float shift;
-    private bool segurando = false;
+    public bool segurando = false;
+    public bool segurandocerto = false;
     private int timesegurar = 0;
     private int idletime = 0;
     private int itemperto = 0;
     private int playerid;
-    private Collider itemspec;
+    public Collider itemspec;
     float angulotempo = 0;
     float angulonovo;
     float anguloanimationtime = 60;
@@ -44,9 +49,18 @@ public class PlayerController : MonoBehaviourPunCallbacks
     float inputRotation;
     float inputSpeed;
 
+
+    [PunRPC]
+    void macarpc(bool se, GameObject maca)
+    {
+        segurandocerto = se;
+        macacerta = maca;
+    }
+
     //--------------------------------------------------------
     void Start()
     {
+        player = PhotonNetwork.LocalPlayer;
         playernumber = PhotonNetwork.LocalPlayer.ActorNumber;
         self = this.gameObject;
         
@@ -70,7 +84,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         if (myPhotonView.IsMine)
         {
-            
             //pegar botoes movimento
             hsp = Input.GetAxis("Player1_Horizontal");
             vsp = Input.GetAxis("Player1_Vertical");
@@ -87,11 +100,32 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 {
                     if (timesegurar <= 0)
                     {
-                        segurando = false;
-                        itemspec.gameObject.GetComponent<OwnerItem>().soltou = true;
-                        //itemspec.gameObject.transform.parent = null;
-                        timesegurar = 160;
-                        //soltar
+                        if(segurandocerto)
+                        {
+
+                            //Debug.Log(timeusando);
+                            //item certo na mao na maca certa
+                            timeusando +=1*Time.deltaTime;
+                            if(timeusando>3)
+                            {
+                                entregou = true;
+                                macacerta.GetComponent<MacaAnimal>().finalizado = true;
+                                macacerta.GetComponent<MacaAnimal>().macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
+                                PhotonNetwork.Destroy(itemspec.GetComponent<PhotonView>());
+                                segurando = false;
+                                Debug.Log("entregou");
+                                timeusando = 0;
+
+                            }
+                        }
+                        else
+                        {
+                            segurando = false;
+                            itemspec.gameObject.GetComponent<OwnerItem>().soltou = true;
+                            //itemspec.gameObject.transform.parent = null;
+                            timesegurar = 160;
+                            //soltar
+                        }
                     }
                 }
                 if (itemperto==1)
@@ -116,6 +150,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
                         }
                     }
                 }
+            }
+            else
+            {
+                timeusando = 0;
             }
 
 
@@ -227,7 +265,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
                             nameScript.ChangeWidth(4f);
                             if (playernumber == 1)
                             {
-                                nameScript.OutlineColor = Color.yellow;
+                                nameScript.OutlineColor = Color.red;
                             }
                             if (playernumber == 2)
                             {
@@ -348,4 +386,5 @@ public class PlayerController : MonoBehaviourPunCallbacks
             }
         }
     }
+    
 }

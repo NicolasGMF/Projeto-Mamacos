@@ -146,6 +146,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myId: 0
+  entregou: 0
+  macacerta: {fileID: 0}
+  segurando: 0
+  segurandocerto: 0
+  itemspec: {fileID: 0}
   self: {fileID: 0}
   playernumber: 0
   hand: {fileID: 4966718893995646182}
@@ -342,7 +347,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   outlineMode: 0
-  outlineColor: {r: 1, g: 1, b: 0, a: 1}
+  outlineColor: {r: 1, g: 0, b: 0, a: 1}
   outlineWidth: 1.5
   precomputeOutline: 0
   bakeKeys: []

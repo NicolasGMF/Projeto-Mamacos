@@ -43,6 +43,13 @@ MonoBehaviour:
   - ChatMessageReceived
   - ChangeParentId
   - RestartParentId
+  - SetAnimal
+  - SetItem
+  - Finalizar
+  - macarpc
+  - Setlado
+  - Setspa
+  - SetQuant
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
