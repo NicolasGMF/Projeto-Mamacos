@@ -32,11 +32,12 @@ public class Pausemenu : MonoBehaviour
     void pause()
     {
         pausemenuUi.SetActive(true);
-        Time.timeScale = 0f;
+        Time.timeScale = 1f;
         Parandojogo=true;
     }
     public void carregarmenu()
     {
+        Time.timeScale= 1.0f;
         SceneManager.LoadScene(cenas);
     }
     public void sairdojogo() 
