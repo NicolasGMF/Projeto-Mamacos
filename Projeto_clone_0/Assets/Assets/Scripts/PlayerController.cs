@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private int idletime = 0;
     private int itemperto = 0;
     private int playerid;
+    private bool fumaAtiva = false;
     public Collider itemspec;
     float angulotempo = 0;
     float angulonovo;
@@ -33,6 +34,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     public GameObject self;
     public int playernumber;
     public GameObject hand;
+    public GameObject effectSmoke;
 
 
     public ParticleSystem ps;
@@ -57,13 +59,20 @@ public class PlayerController : MonoBehaviourPunCallbacks
         macacerta = maca;
     }
 
+    [PunRPC]
+    void fumaca(bool fumaAtiv)
+    {
+        fumaAtiva = fumaAtiv;
+    }
+
+
     //--------------------------------------------------------
     void Start()
     {
         player = PhotonNetwork.LocalPlayer;
         playernumber = PhotonNetwork.LocalPlayer.ActorNumber;
         self = this.gameObject;
-        
+        effectSmoke.SetActive(false);
         ps.Stop();
         animator = GetComponentInChildren<Animator>(); //pegar o objeto animator do filho
         rb = GetComponent<Rigidbody>(); //pegar o objeto rigidbody
@@ -82,6 +91,17 @@ public class PlayerController : MonoBehaviourPunCallbacks
     //--------------------------------------------------------
     void Update()
     {
+        if(fumaAtiva)
+        {
+            effectSmoke.SetActive(true);
+            if (myPhotonView.IsMine) myPhotonView.RPC("fumaca", RpcTarget.OthersBuffered,fumaAtiva);
+        }
+        else
+        {
+            effectSmoke.SetActive(false);
+            if (myPhotonView.IsMine) myPhotonView.RPC("fumaca", RpcTarget.OthersBuffered, fumaAtiva);
+        }
+
         if (myPhotonView.IsMine)
         {
             //pegar botoes movimento
@@ -93,6 +113,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
             //segurar objetos
 
+            if (use <= 0 || !segurandocerto) fumaAtiva=false;
             if (timesegurar >0) timesegurar--;
             if (use > 0)
             {
@@ -100,9 +121,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 {
                     if (timesegurar <= 0)
                     {
-                        if(segurandocerto)
-                        {
+                        fumaAtiva = true;
 
+                        if (segurandocerto)
+                        {
                             //Debug.Log(timeusando);
                             //item certo na mao na maca certa
                             timeusando +=1*Time.deltaTime;
@@ -113,6 +135,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
                                 macacerta.GetComponent<MacaAnimal>().macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
                                 PhotonNetwork.Destroy(itemspec.GetComponent<PhotonView>());
                                 segurando = false;
+                                segurandocerto = false;
                                 Debug.Log("entregou");
                                 timeusando = 0;
 
@@ -120,6 +143,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
                         }
                         else
                         {
+                            effectSmoke.SetActive(false);
                             segurando = false;
                             itemspec.gameObject.GetComponent<OwnerItem>().soltou = true;
                             //itemspec.gameObject.transform.parent = null;

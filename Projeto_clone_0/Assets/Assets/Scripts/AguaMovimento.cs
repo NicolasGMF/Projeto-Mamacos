@@ -13,6 +13,10 @@ public class AguaMovimento : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-     transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y+Mathf.Sin(Time.time)*0.0005f, transform.localPosition.z);   
+   
+    }
+    void Awake()
+    {
+        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y + Mathf.Sin(Time.time) * 0.0005f, transform.localPosition.z);
     }
 }

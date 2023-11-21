@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class Levelloader : MonoBehaviour
 {
     public Animator transition;
-    public float transitiontempo= 1f;
+    public float transitiontempo= 3f;
     void Update()
     {
        /*  if (Input.GetButtonDown("Game"))
@@ -17,6 +17,11 @@ public class Levelloader : MonoBehaviour
     public void loadscene()
     {
         SceneManager.LoadScene("Game");
+    }
+
+    public void loadmenu()
+    {
+        SceneManager.LoadScene("Menu");
     }
     public void Carregarproximacena()
     {
