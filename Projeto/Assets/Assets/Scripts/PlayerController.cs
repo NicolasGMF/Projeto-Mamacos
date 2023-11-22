@@ -399,15 +399,11 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
 
 
-            gameObject.transform.position = new Vector3(transform.position.x + (vsp * spd * Time.deltaTime ), transform.position.y, transform.position.z + (hsp * spd * Time.deltaTime));
-            //Vector3 force = rot * Vector3.forward * inputSpeed * 1000 * Time.deltaTime;
-            //rbody.AddForce(force);
+            //gameObject.transform.position = new Vector3(transform.position.x + (vsp * spd * Time.deltaTime ), transform.position.y, transform.position.z + (hsp * spd * Time.deltaTime));
+            //Vector3 force = Vector3.forward * inputSpeed * 1000 * Time.deltaTime;
+            Vector3 movement = new Vector3(vsp, -1, hsp).normalized;
+            rbody.velocity = movement * spd*500 * Time.deltaTime;
 
-
-            if (rbody.velocity.magnitude > 5)
-            {
-                rbody.velocity = rbody.velocity.normalized * 2;
-            }
         }
     }
     
