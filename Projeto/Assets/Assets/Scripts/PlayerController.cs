@@ -132,7 +132,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
                             {
                                 entregou = true;
                                 macacerta.GetComponent<MacaAnimal>().finalizado = true;
-                                macacerta.GetComponent<MacaAnimal>().macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
+                                //macacerta.GetComponent<MacaAnimal>().macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
                                 PhotonNetwork.Destroy(itemspec.GetComponent<PhotonView>());
                                 segurando = false;
                                 segurandocerto = false;

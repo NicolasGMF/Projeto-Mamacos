@@ -2,6 +2,7 @@ using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -16,9 +17,10 @@ public class MacaAnimal : MonoBehaviour
         animallist[idd].SetActive(true);
     }
     [PunRPC]
-    void SetItem(int idd)
+    void SetItem(int idd, int itemId)
     {
         itemnec = idd;
+        listaItemsId = itemId;
         baloeslist[idd].SetActive(true);
     }
     [PunRPC]
@@ -42,20 +44,28 @@ public class MacaAnimal : MonoBehaviour
     }
 
 
-
     public PhotonView macapv;
     public bool atua = false;
     public GameObject spawner;
     public bool quantiminus = false;
+    private bool gainMoney = true;
     public float spd = 1;
     public string lado = "";
     public bool finalizado = false;
     public GameObject[] animallist;
-    public GameObject[] baloeslist;
+    public GameObject[] baloeslist; 
+    public int listaItemsId;
+    public int itemOrdem = 0;
     public int itemnec = -1;
+
+
+
+    public int[,] tarefas = new int[3,5];
+
     // Start is called before the first frame update
     void Start()
     {
+        SetTarefas();
         macapv = GetComponent<PhotonView>();
         if (PhotonNetwork.LocalPlayer.IsMasterClient)
         {
@@ -64,10 +74,10 @@ public class MacaAnimal : MonoBehaviour
             animallist[randomn].SetActive(true);
             macapv.RPC("SetAnimal", RpcTarget.OthersBuffered, randomn);
             //setar item
-            var randomn2 = Random.Range(0, 2); //0 a 1
-            itemnec = randomn2;
-            baloeslist[randomn2].SetActive(true);
-            macapv.RPC("SetItem", RpcTarget.OthersBuffered, randomn2);
+            listaItemsId = Random.Range(0, 3); //0 a 2
+            itemnec = tarefas[listaItemsId,0];
+            baloeslist[tarefas[listaItemsId,0]].SetActive(true);
+            macapv.RPC("SetItem", RpcTarget.OthersBuffered, itemnec,listaItemsId);
             if (lado == "esquerda")
             {
                 transform.rotation = new Quaternion(0, 180, 0, 0); 
@@ -100,23 +110,42 @@ public class MacaAnimal : MonoBehaviour
             {
                 if (finalizado)
                 {
-                    if (!atua)
+                    if(gainMoney) GlobalVariables.Instance.money += 50; gainMoney = false;
+                    if (tarefas[listaItemsId,itemOrdem+1]==-1)
                     {
-                        macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
-                        atua = true;
-                    }
-                    baloeslist[itemnec].SetActive(false);
-                    transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + (-1.5f * Time.deltaTime));
-                    if (transform.position.z < -20)
-                    {
-                        if (macapv.IsMine)
+                        if (!atua)
                         {
-                            quantiminus = true;
-                            macapv.RPC("SetQuant", RpcTarget.OthersBuffered);
+                            macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
+                            atua = true;
+                        }
+                        baloeslist[itemnec].SetActive(false);
+                        transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + (-1.5f * Time.deltaTime));
+                        if (transform.position.z < -20)
+                        {
+                            if (macapv.IsMine)
+                            {
+                                quantiminus = true;
+                                macapv.RPC("SetQuant", RpcTarget.OthersBuffered);
+
+                            }
 
                         }
-
                     }
+                    else
+                    {
+                        gainMoney = true;
+                        itemOrdem += 1;
+                        baloeslist[itemnec].SetActive(false);
+                        itemnec = tarefas[listaItemsId,itemOrdem];
+                        baloeslist[itemnec].SetActive(true);
+                        finalizado = false;
+                        if (macapv.IsMine)
+                        {
+                            macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
+
+                        }
+                    }
+                    
                 }
                 else
                 {
@@ -130,22 +159,40 @@ public class MacaAnimal : MonoBehaviour
             {
                 if (finalizado)
                 {
-                    if (!atua)
+                    if (gainMoney) GlobalVariables.Instance.money += 50; gainMoney = false;
+                    if (tarefas[listaItemsId, itemOrdem + 1] == -1)
                     {
-                        macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
-                        atua = true;
+                        if (!atua)
+                        {
+                            macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
+                            atua = true;
+                        }
+                        //macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
+                        baloeslist[itemnec].SetActive(false);
+                        transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + (1.5f * Time.deltaTime));
+                        if (transform.position.z > 17)
+                        {
+                            if (macapv.IsMine)
+                            {
+                                quantiminus = true;
+                                macapv.RPC("SetQuant", RpcTarget.OthersBuffered);
+                            }
+
+                        }
                     }
-                    //macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
-                    baloeslist[itemnec].SetActive(false);
-                    transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + (1.5f * Time.deltaTime));
-                    if (transform.position.z > 17)
+                    else
                     {
+                        gainMoney = true;
+                        itemOrdem += 1;
+                        baloeslist[itemnec].SetActive(false);
+                        itemnec = tarefas[listaItemsId, itemOrdem];
+                        baloeslist[itemnec].SetActive(true);
+                        finalizado = false;
                         if (macapv.IsMine)
                         {
-                            quantiminus = true;
-                            macapv.RPC("SetQuant", RpcTarget.OthersBuffered);
-                        }
+                            macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
 
+                        }
                     }
 
 
@@ -208,4 +255,20 @@ public class MacaAnimal : MonoBehaviour
             }
         }
     }
+
+    //0 bandagem
+    //1 seringa
+    //2 bisturi
+    void SetTarefas()
+    {
+        tarefas[0, 0] = 0;
+        tarefas[0, 1] = -1;
+        tarefas[1, 0] = 1;
+        tarefas[1, 1] = -1;
+        tarefas[2, 0] = 1;
+        tarefas[2, 1] = 2;
+        tarefas[2, 2] = 0;
+        tarefas[2, 3] = -1;
+    }
+
 }
