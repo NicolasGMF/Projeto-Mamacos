@@ -24,34 +24,38 @@ public class GameSpawn : MonoBehaviour
     {
         if (PhotonNetwork.LocalPlayer.IsMasterClient)
         {
-            if (started)
+            if(GlobalVariables.Instance.comeco)
             {
-                gametime += 1 * Time.deltaTime;
-                if(spawnid==1)
+                if (started)
                 {
-                    if (gametime > 10 && ordaspawn == 0 && quantion == 0)
+                    gametime += 1 * Time.deltaTime;
+                    if (spawnid == 1)
                     {
-                        var maca = PhotonNetwork.Instantiate("MacaAnimal", transform.position, transform.rotation);
-                        maca.GetComponent<MacaAnimal>().spawner = this.gameObject;
-                        maca.GetComponent<MacaAnimal>().lado = "direita";
-                        quantion++;
-                        //ordaspawn = 1; se comentado fica infinito
+                        if (gametime > 10 && ordaspawn == 0 && quantion == 0)
+                        {
+                            var maca = PhotonNetwork.Instantiate("MacaAnimal", transform.position, transform.rotation);
+                            maca.GetComponent<MacaAnimal>().spawner = this.gameObject;
+                            maca.GetComponent<MacaAnimal>().lado = "direita";
+                            quantion++;
+                            //ordaspawn = 1; se comentado fica infinito
+                        }
                     }
-                }
-                if(spawnid==2)
-                {
-                    if (gametime > 15 && ordaspawn == 0 && quantion == 0)
+                    if (spawnid == 2)
                     {
-                        Debug.Log(quantion);
-                        var maca = PhotonNetwork.Instantiate("MacaAnimal", transform.position, transform.rotation);
-                        maca.GetComponent<MacaAnimal>().spawner = this.gameObject;
-                        maca.GetComponent<MacaAnimal>().lado = "esquerda";
-                        //maca.GetComponent<MacaAnimal>().GetComponent<PhotonView>().RPC("Setspa", RpcTarget.OthersBuffered, this.gameObject); ;
-                        quantion++;
-                        //ordaspawn = 1;
+                        if (gametime > 15 && ordaspawn == 0 && quantion == 0)
+                        {
+                            Debug.Log(quantion);
+                            var maca = PhotonNetwork.Instantiate("MacaAnimal", transform.position, transform.rotation);
+                            maca.GetComponent<MacaAnimal>().spawner = this.gameObject;
+                            maca.GetComponent<MacaAnimal>().lado = "esquerda";
+                            //maca.GetComponent<MacaAnimal>().GetComponent<PhotonView>().RPC("Setspa", RpcTarget.OthersBuffered, this.gameObject); ;
+                            quantion++;
+                            //ordaspawn = 1;
+                        }
                     }
                 }
             }
+            
         }
     }
 }

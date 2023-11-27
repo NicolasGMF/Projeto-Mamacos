@@ -77,6 +77,14 @@ public class GameConnection : MonoBehaviourPunCallbacks
         {
             GlobalVariables.Instance.myPlayer = PhotonNetwork.Instantiate("Player2", position, rotation);
         }
+        if (playernumber == 3)
+        {
+            GlobalVariables.Instance.myPlayer = PhotonNetwork.Instantiate("Player3", position, rotation);
+        }
+        if (playernumber == 4)
+        {
+            GlobalVariables.Instance.myPlayer = PhotonNetwork.Instantiate("Player4", position, rotation);
+        }
         mySelf = GlobalVariables.Instance.myPlayer.GetComponent<PlayerController>();
         animator = mySelf.GetComponentInChildren<Animator>();
     }

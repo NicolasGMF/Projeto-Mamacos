@@ -3,6 +3,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon.StructWrapping;
 using UnityEditor;
+using System.Text.RegularExpressions;
 
 public class PlayerController : MonoBehaviourPunCallbacks
 {
@@ -14,13 +15,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private float hsp;
     private float timeusando = 0;
     public bool entregou = false;
+    public bool dance = false;
+    public bool ondance = false;
     public GameObject macacerta;
     private float use;
     private float vsp;
     private float shift;
     public bool segurando = false;
     public bool segurandocerto = false;
-    private int timesegurar = 0;
+    private float timesegurar = 0;
     private int idletime = 0;
     private int itemperto = 0;
     private int playerid;
@@ -104,164 +107,178 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         if (myPhotonView.IsMine)
         {
-            //pegar botoes movimento
-            hsp = Input.GetAxis("Player1_Horizontal");
-            vsp = Input.GetAxis("Player1_Vertical");
-            use = Input.GetAxis("Player1_Use");
-            shift = Input.GetAxis("Player1_Shift");
-
-
-            //segurar objetos
-
-            if (use <= 0 || !segurandocerto) fumaAtiva=false;
-            if (timesegurar >0) timesegurar--;
-            if (use > 0)
+            if (!GlobalVariables.Instance.paused)
             {
-                if (segurando)
-                {
-                    if (timesegurar <= 0)
-                    {
-                        fumaAtiva = true;
+                hsp = Input.GetAxis("Player1_Horizontal");
+                vsp = Input.GetAxis("Player1_Vertical");
+                use = Input.GetAxis("Player1_Use");
+                shift = Input.GetAxis("Player1_Shift");
 
-                        if (segurandocerto)
+
+                //segurar objetos
+
+                if (use <= 0 || !segurandocerto) fumaAtiva = false;
+                if (timesegurar > 0) timesegurar -= 60 * Time.deltaTime;
+                if (use > 0)
+                {
+                    if (segurando)
+                    {
+                        if (timesegurar <= 0)
                         {
-                            //Debug.Log(timeusando);
-                            //item certo na mao na maca certa
-                            timeusando +=1*Time.deltaTime;
-                            if(timeusando>3)
+                            fumaAtiva = true;
+
+                            if (segurandocerto)
                             {
-                                entregou = true;
-                                macacerta.GetComponent<MacaAnimal>().finalizado = true;
-                                //macacerta.GetComponent<MacaAnimal>().macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
-                                PhotonNetwork.Destroy(itemspec.GetComponent<PhotonView>());
+                                //Debug.Log(timeusando);
+                                //item certo na mao na maca certa
+                                timeusando += 1 * Time.deltaTime;
+                                if (timeusando > 3)
+                                {
+                                    entregou = true;
+                                    macacerta.GetComponent<MacaAnimal>().finalizado = true;
+                                    //macacerta.GetComponent<MacaAnimal>().macapv.RPC("Finalizar", RpcTarget.OthersBuffered);
+                                    PhotonNetwork.Destroy(itemspec.GetComponent<PhotonView>());
+                                    segurando = false;
+                                    segurandocerto = false;
+                                    Debug.Log("entregou");
+                                    timeusando = 0;
+
+                                }
+                            }
+                            else
+                            {
+                                effectSmoke.SetActive(false);
                                 segurando = false;
-                                segurandocerto = false;
-                                Debug.Log("entregou");
-                                timeusando = 0;
+                                itemspec.gameObject.GetComponent<OwnerItem>().soltou = true;
+                                //itemspec.gameObject.transform.parent = null;
+                                timesegurar = 15;
+                                //soltar
+                            }
+                        }
+                    }
+                    if (itemperto == 1)
+                    {
+                        if (timesegurar <= 0)
+                        {
+                            if (!segurando)
+                            {
+                                //segurar
+                                //itemspec.isTrigger = true;
+                                //var pv = itemspec.gameObject.GetComponent<PhotonView>();
+                                //itemspec.gameObject.GetComponent<OwnerItem>().ResquestOwner(PhotonNetwork.LocalPlayer.Get(PhotonNetwork.LocalPlayer.ActorNumber));
+                                itemspec.gameObject.GetComponent<OwnerItem>().PV.RequestOwnership();
+                                itemspec.gameObject.GetComponent<OwnerItem>().newow = true;
+                                itemspec.gameObject.GetComponent<OwnerItem>().parentid = myId;
+                                itemspec.gameObject.GetComponent<OwnerItem>().pegou = true;
+                                //itemspec.gameObject.transform.parent = hand.transform; 
+                                //itemspec.gameObject.transform.SetParent(PhotonView.Find());
+                                segurando = true;
+                                timesegurar = 15;
 
                             }
                         }
-                        else
-                        {
-                            effectSmoke.SetActive(false);
-                            segurando = false;
-                            itemspec.gameObject.GetComponent<OwnerItem>().soltou = true;
-                            //itemspec.gameObject.transform.parent = null;
-                            timesegurar = 160;
-                            //soltar
-                        }
                     }
-                }
-                if (itemperto==1)
-                {
-                    if(timesegurar<=0)
-                    {
-                        if (!segurando)
-                        {
-                            //segurar
-                            //itemspec.isTrigger = true;
-                            //var pv = itemspec.gameObject.GetComponent<PhotonView>();
-                            //itemspec.gameObject.GetComponent<OwnerItem>().ResquestOwner(PhotonNetwork.LocalPlayer.Get(PhotonNetwork.LocalPlayer.ActorNumber));
-                            itemspec.gameObject.GetComponent<OwnerItem>().PV.RequestOwnership();
-                            itemspec.gameObject.GetComponent<OwnerItem>().newow = true;
-                            itemspec.gameObject.GetComponent<OwnerItem>().parentid = myId;
-                            itemspec.gameObject.GetComponent<OwnerItem>().pegou = true;
-                            //itemspec.gameObject.transform.parent = hand.transform; 
-                            //itemspec.gameObject.transform.SetParent(PhotonView.Find());
-                            segurando = true;
-                            timesegurar = 160;
-
-                        }
-                    }
-                }
-            }
-            else
-            {
-                timeusando = 0;
-            }
-
-
-
-            //correr
-            if (shift > 0)
-            {
-                if(segurando)
-                {
-                    shift = 0;
                 }
                 else
                 {
-                    vsp = vsp * 2;
-                    hsp = hsp * 2;
+                    timeusando = 0;
                 }
-                //animator.SetFloat("velocidade", 2);
+
+
+
+                //correr
+                if (shift > 0)
+                {
+                    if (segurando)
+                    {
+                        shift = 0;
+                    }
+                    else
+                    {
+                        vsp = vsp * 2;
+                        hsp = hsp * 2;
+                    }
+                    //animator.SetFloat("velocidade", 2);
+                }
+                else
+                {
+                    //animator.SetFloat("velocidade", 1);
+                }
+                //controlar velocidade na diagonal
+                if (hsp != 0 && vsp != 0)
+                {
+                    hsp = hsp / 1.3f;
+                    vsp = vsp / 1.3f;
+                }
+                //angulo do personagem
+                if (angulotempo > 0) angulotempo -= Time.deltaTime * 100;
+
+                if (vsp == 0 && hsp < 0) angulonovo = 0;
+                if (vsp < 0 && hsp < 0) angulonovo = 45;
+                if (vsp < 0 && hsp == 0) angulonovo = 90;
+                if (vsp < 0 && hsp > 0) angulonovo = 135;
+                if (vsp == 0 && hsp > 0) angulonovo = 180;
+                if (vsp > 0 && hsp > 0) angulonovo = 225;
+                if (vsp > 0 && hsp == 0) angulonovo = 270;
+                if (vsp > 0 && hsp < 0) angulonovo = 315;
+
+                //movimentação mais fluida
+                if (angulotempo <= 0)
+                {
+                    if (transform.eulerAngles.y != angulonovo)
+                    {
+                        //arrumar erro de volta 360 pra 0
+                        if (Mathf.Abs(transform.eulerAngles.y - angulonovo) > 180)
+                        {
+                            transform.eulerAngles = new Vector3(0, angulonovo / 2 + transform.eulerAngles.y / 2 + 180, 0);
+                        }
+                        else transform.eulerAngles = new Vector3(0, angulonovo / 2 + transform.eulerAngles.y / 2, 0);
+                        angulotempo = spdangular;
+                    }
+                    else transform.eulerAngles = new Vector3(0, angulonovo, 0);
+                }
+                else
+                {
+                    if (anguloanimationtime <= 0)
+                    {
+                        if (Mathf.Abs(transform.eulerAngles.y - angulonovo) > 180)
+                        {
+                            transform.eulerAngles = new Vector3(0, angulonovo / 2 + transform.eulerAngles.y / 2 + 180, 0);
+                        }
+                        else transform.eulerAngles = new Vector3(0, angulonovo / 2 + transform.eulerAngles.y / 2, 0);
+                        anguloanimationtime = spdangular;
+                    }
+                    anguloanimationtime -= Time.deltaTime * 100;
+
+                }
+
+
+                inputRotation = Input.GetAxis("Horizontal");
+                inputSpeed = Input.GetAxis("Vertical");
+
+                if (Input.GetKeyDown(KeyCode.C))
+                {
+                    myHue = Random.Range(0.0f, 1.0f);
+                    SendMyColor();
+                }
+
+
+
+
+
             }
             else
             {
-                //animator.SetFloat("velocidade", 1);
+                hsp = 0;
+                vsp = 0;
+                use = 0;
+                shift = 0;
+                animator.SetBool("idleani1", true);
+                animator.SetBool("andando", false);
+                animator.SetBool("correndo", false);
+                ps.Stop();
             }
-            //controlar velocidade na diagonal
-            if (hsp != 0 && vsp != 0)
-            {
-                hsp = hsp / 1.3f;
-                vsp = vsp / 1.3f;
-            }
-            //angulo do personagem
-            if (angulotempo > 0) angulotempo -= Time.deltaTime * 100;
-
-            if (vsp == 0 && hsp < 0) angulonovo = 0;
-            if (vsp < 0 && hsp < 0) angulonovo = 45;
-            if (vsp < 0 && hsp == 0) angulonovo = 90;
-            if (vsp < 0 && hsp > 0) angulonovo = 135;
-            if (vsp == 0 && hsp > 0) angulonovo = 180;
-            if (vsp > 0 && hsp > 0) angulonovo = 225;
-            if (vsp > 0 && hsp == 0) angulonovo = 270;
-            if (vsp > 0 && hsp < 0) angulonovo = 315;
-
-            //movimentação mais fluida
-            if (angulotempo <= 0)
-            {
-                if (transform.eulerAngles.y != angulonovo)
-                {
-                    //arrumar erro de volta 360 pra 0
-                    if (Mathf.Abs(transform.eulerAngles.y - angulonovo) > 180)
-                    {
-                        transform.eulerAngles = new Vector3(0, angulonovo / 2 + transform.eulerAngles.y / 2 + 180, 0);
-                    }
-                    else transform.eulerAngles = new Vector3(0, angulonovo / 2 + transform.eulerAngles.y / 2, 0);
-                    angulotempo = spdangular;
-                }
-                else transform.eulerAngles = new Vector3(0, angulonovo, 0);
-            }
-            else
-            {
-                if (anguloanimationtime <= 0)
-                {
-                    if (Mathf.Abs(transform.eulerAngles.y - angulonovo) > 180)
-                    {
-                        transform.eulerAngles = new Vector3(0, angulonovo / 2 + transform.eulerAngles.y / 2 + 180, 0);
-                    }
-                    else transform.eulerAngles = new Vector3(0, angulonovo / 2 + transform.eulerAngles.y / 2, 0);
-                    anguloanimationtime = spdangular;
-                }
-                anguloanimationtime -= Time.deltaTime * 100;
-
-            }
-
-
-            inputRotation = Input.GetAxis("Horizontal");
-            inputSpeed = Input.GetAxis("Vertical");
-
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                myHue = Random.Range(0.0f, 1.0f);
-                SendMyColor();
-            }
-
-
-
-           
-
+            //pegar botoes movimento
 
         }
     }
@@ -356,15 +373,53 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         if (myPhotonView.IsMine)
         {
+
+            //emote
+            var button9Debbug = Input.GetKey("[9]");
+            var button8Debbug = Input.GetKey("[8]");
+            var button7Debbug = Input.GetKey("[7]");
+            var button6Debbug = Input.GetKey("[6]");
+
+            if (button9Debbug)
+            {
+                animator.SetBool("idleani1", true); ondance = true; 
+                idletime = 3001;
+            }
+            if (button8Debbug)
+            {
+                animator.SetBool("idleani2", true); ondance = true;
+                idletime = 3001;
+            }
+            if (button7Debbug)
+            {
+                animator.SetBool("idleani3", true); ondance = true;
+                idletime = 3001;
+            }
+            if (button6Debbug)
+            {
+                animator.SetBool("idleani4", true); ondance = true;
+                idletime = 3001;
+            }
+
+
+
+
+
             // Quaternion rot = rbody.rotation * Quaternion.Euler(0, inputRotation * Time.deltaTime * 60, 0);
             //rbody.MoveRotation(rot);
 
             if ((vsp != 0) || (hsp != 0))
             {
+                
                 if(idletime>3000)
                 {
                     animator.SetBool("idleani1", false);
+                    animator.SetBool("idleani2", false);
+                    animator.SetBool("idleani3", false);
+                    animator.SetBool("idleani4", false);
                 }
+                dance = false;
+                ondance = false;
                 idletime = 0;
                 animator.SetBool("andando", true);
                 if (segurando)
@@ -391,10 +446,21 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 idletime++;
                 if(idletime>3000)
                 {
-                    animator.SetBool("idleani1", true);
+                    if (!ondance)
+                    {
+                        ondance = true;
+                        var randoani = Random.Range(1, 5);
+                        if(randoani==1) animator.SetBool("idleani1", true);
+                        if (randoani == 2) animator.SetBool("idleani2", true);
+                        if (randoani == 3) animator.SetBool("idleani3", true);
+                        if (randoani == 4) animator.SetBool("idleani4", true);
+
+                        Debug.Log(randoani);
+                    }
                     idletime = 4000;
                 }
                 animator.SetBool("andando", false);
+                animator.SetBool("correndo", false);
             }
 
 

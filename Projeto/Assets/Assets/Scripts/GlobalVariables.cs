@@ -6,6 +6,9 @@ public class GlobalVariables : MonoBehaviour
     // This is where you create the global variable that can be accessed from anywhere.
     public GameObject myPlayer;
     public int money;
+    public float timer = 180;
+    public bool paused = false;
+    public bool comeco = false;
     // This part helps ensure there's only one instance of this class.
     private static GlobalVariables instance;
     public static GlobalVariables Instance
